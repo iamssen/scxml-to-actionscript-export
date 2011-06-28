@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel 
+	width="300" height="160" xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	xmlns:view="ssen.scxml2Logic.view.*" title="Parsing SCXML Source"
+	xmlns:scxml2Logic="ssen.scxml2Logic.*">
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			import mx.managers.PopUpManager;
+
+			import ssen.logic.Wire;
+			import ssen.scxml2Logic.trigger.Complete;
+
+			private var _wire:Wire;
+
+			/** @private */
+			protected function get wire():Wire {
+				return _wire;
+			}
+
+			/** @private */
+			[Inject]
+			public function set_wire(wire:Wire):void {
+				_wire = wire;
+				_wire.addEventListener("openParseMessage",
+									   wire_openParseMessageHandler);
+				_wire.addEventListener("closeParseMessage",
+									   wire_closeParseMessageHandler);
+			}
+
+			private function wire_openParseMessageHandler(event:Event):void {
+				PopUpManager.addPopUp(this,
+									  FlexGlobals.topLevelApplication as DisplayObject,
+									  true);
+				PopUpManager.centerPopUp(this);
+			}
+
+			private function wire_closeParseMessageHandler(event:Event):void {
+				PopUpManager.removePopUp(this);
+				currentState = "parse";
+			}
+
+			private function wire_parseCompleteHandler(event:Event):void {
+				currentState = "complete";
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<scxml2Logic:SCXML2LogicContextLoader/>
+	</fx:Declarations>
+	<s:states>
+		<s:State name="parse"/>
+		<s:State name="complete"/>
+	</s:states>
+	<s:layout>
+		<s:VerticalLayout 
+			horizontalAlign="center" verticalAlign="middle" gap="15"/>
+	</s:layout>
+	<s:Label 
+		text="코드를 생성 중 입니다. 잠시만 기다리세요." includeIn="parse"/>
+	<s:Label 
+		text="코드 생성을 완료 했습니다." includeIn="complete"/>
+	<s:Button 
+		label="확인"
+		click="wire.fire(Complete)" includeIn="complete"/>
+</s:Panel>

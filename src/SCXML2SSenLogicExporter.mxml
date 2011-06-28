@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication 
+	width="710" height="550" xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	xmlns:view="ssen.scxml2Logic.view.*" xmlns:scxml2Logic="ssen.scxml2Logic.*">
+	<fx:Script>
+		<![CDATA[
+			import ssen.logic.Wire;
+			import ssen.scxml2Logic.model.SourceModel;
+			import ssen.scxml2Logic.trigger.Add;
+			import ssen.scxml2Logic.trigger.Parse;
+			import ssen.scxml2Logic.view.ParseMessage;
+			import ssen.scxml2Logic.view.SourceEditor;
+			import ssen.ui.Notify;
+
+			/** @private */
+			[Inject]
+			[Bindable]
+			public var model:SourceModel;
+
+			/** @private */
+			[Inject]
+			public var wire:Wire;
+
+			private function parseSource():void {
+				if (model.list.length > 0) {
+					wire.fire(Parse);
+				} else {
+					Notify.alert("소스가 하나도 없습니다.");
+				}
+			}
+
+			private function addSource():void {
+				model.update = false;
+				model.cache = null;
+				wire.fire(Add);
+			}
+
+			private function scxml2logiccontextloader1_initHandler(event:Event):void {
+				wire.instantiate(SourceEditor);
+				wire.instantiate(ParseMessage);
+				currentState = "on";
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<scxml2Logic:SCXML2LogicContextLoader init="scxml2logiccontextloader1_initHandler(event)"/>
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout 
+			paddingBottom="10" paddingLeft="10" paddingRight="10"
+			paddingTop="10" gap="10"/>
+	</s:layout>
+	<s:states>
+		<s:State name="off"/>
+		<s:State name="on"/>
+	</s:states>
+	<s:Scroller 
+		width="100%" height="100%"
+		horizontalScrollPolicy="off" verticalScrollPolicy="on" includeIn="on">
+		<s:DataGroup 
+			dataProvider="{model.list}"
+			itemRenderer="ssen.scxml2Logic.view.SourceItem">
+			<s:layout>
+				<s:VerticalLayout gap="5"/>
+			</s:layout>
+		</s:DataGroup>
+	</s:Scroller>
+	<s:Group 
+		width="100%" height="35">
+		<s:layout>
+			<s:HorizontalLayout 
+				horizontalAlign="center" verticalAlign="middle"/>
+		</s:layout>
+		<s:Button 
+			label="새로운 소스를 추가합니다."
+			click="addSource();"/>
+		<s:Button 
+			label="액션스크립트 코드를 퍼블리싱 합니다."
+			click="parseSource();"/>
+	</s:Group>
+</s:WindowedApplication>

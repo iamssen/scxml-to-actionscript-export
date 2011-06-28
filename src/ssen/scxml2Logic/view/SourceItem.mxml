@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer 
+	width="100%" height="40" xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:mx="library://ns.adobe.com/flex/mx" autoDrawBackground="true"
+	xmlns:view="ssen.scxml2Logic.view.*" xmlns:scxml2Logic="ssen.scxml2Logic.*">
+	<fx:Script>
+		<![CDATA[
+			import ssen.logic.Wire;
+			import ssen.scxml2Logic.model.Source;
+			import ssen.scxml2Logic.model.SourceModel;
+			import ssen.scxml2Logic.trigger.Modify;
+
+			/** @private */
+			[Inject]
+			public var model:SourceModel;
+
+			/** @private */
+			[Inject]
+			public var wire:Wire;
+
+			private function openModify():void {
+				model.update = true;
+				model.cache = data as Source;
+				wire.fire(Modify);
+			}
+
+			private function deleteSource():void {
+				model.list.removeItem(data);
+			}
+
+			private function scxml2logiccontextloader1_initHandler(event:Event):void {
+				// TODO Auto-generated method stub
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<scxml2Logic:SCXML2LogicContextLoader init="scxml2logiccontextloader1_initHandler(event)"/>
+	</fx:Declarations>
+	<s:layout>
+		<s:HorizontalLayout 
+			paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"
+			verticalAlign="middle" gap="5"/>
+	</s:layout>
+	<s:Label 
+		width="100%" height="100%"
+		fontSize="10" verticalAlign="middle"
+		text="{data.scxml.nativePath} 파일을 {data.src.nativePath} 폴더의 {data.ns}.{data.context} 코드들로 변환하고, 같은 파일이 있을 경우엔 {data.overwriting ? '덮어쓰기 합니다.' : '건너뛰기 합니다.'}"/>
+	<s:Button 
+		width="45"
+		label="수정"
+		click="openModify();"/>
+	<s:Button 
+		width="45"
+		label="삭제"
+		click="deleteSource()"/>
+</s:ItemRenderer>

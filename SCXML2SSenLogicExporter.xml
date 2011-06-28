@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<update xmlns="http://ns.adobe.com/air/framework/update/description/1.0">
+	<version>0.1.0</version>
+	<url>http://ssen.name/utils/SCXML2SSenLogicExporter.air</url>
+	<description>
+		<![CDATA[
+
+		]]>
+	</description>
+	<appId>ssen.scxml2Logic.SCXML2SSenLogicExporter</appId>
+	<pubId></pubId>
+	<runtimeVersion>2.5</runtimeVersion>
+</update> 

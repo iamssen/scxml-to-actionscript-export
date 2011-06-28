@@ -1,0 +1,14 @@
+<project name="scxml to ssen logic build">
+	<target name="upload">
+		<ftp server="ssen.name" port="21" remotedir="/home/ssen/www.ssen.name/web/utils" userid="ssen" password="ssen2008" depends="yes" binary="yes">
+			<fileset dir=".">
+				<include name="SCXML2SSenLogicExporter.air" />
+			</fileset>
+		</ftp>
+		<ftp server="ssen.name" port="21" remotedir="/home/ssen/www.ssen.name/web/utils" userid="ssen" password="ssen2008" depends="yes" binary="no">
+			<fileset dir=".">
+				<include name="SCXML2SSenLogicExporter.xml" />
+			</fileset>
+		</ftp>
+	</target>
+</project>

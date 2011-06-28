@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group 
+	width="400" height="300" xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	xmlns:view="ssen.scxml2Logic.view.*" xmlns:scxml2Logic="ssen.scxml2Logic.*">
+	<fx:Script>
+		<![CDATA[
+			import ssen.scxml2Logic.trigger.Add;
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<scxml2Logic:SCXML2LogicContextLoader id="wire"/>
+	</fx:Declarations>
+	<s:layout>
+		<s:HorizontalLayout clipAndEnableScrolling="true"/>
+	</s:layout>
+	<s:Button label="" click="wire.fire(Add);"/>
+</s:Group>

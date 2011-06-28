@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel 
+	width="400" height="338" xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:mx="library://ns.adobe.com/flex/mx" title="Source Editor"
+	xmlns:view="ssen.scxml2Logic.view.*" xmlns:scxml2Logic="ssen.scxml2Logic.*">
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import ssen.logic.Wire;
+			import ssen.scxml2Logic.model.Source;
+			import ssen.scxml2Logic.model.SourceModel;
+			import ssen.scxml2Logic.trigger.Cancel;
+			import ssen.scxml2Logic.trigger.Complete;
+
+			private var scxml:File;
+
+			private var src:File;
+
+			private var update:Boolean;
+
+			private var overwrite:Boolean;
+
+			/** @private */
+			[Inject]
+			public var model:SourceModel;
+
+			private var _wire:Wire;
+
+			/** @private */
+			protected function get wire():Wire {
+				return _wire;
+			}
+
+			/** @private */
+			[Inject]
+			public function set_wire(wire:Wire):void {
+				_wire = wire;
+				_wire.addEventListener("openEditor",
+									   wire_openEditorHandler);
+				_wire.addEventListener("closeEditor",
+									   wire_closeEditorHandler);
+			}
+
+			/* *********************************************************************
+			* on/off event handling
+			********************************************************************* */
+			private var created:Boolean;
+
+			private function wire_openEditorHandler(event:Event):void {
+				if (created) {
+					setting();
+				} else {
+					addEventListener(FlexEvent.CREATION_COMPLETE,
+									 addedToStageHandler);
+				}
+
+				PopUpManager.addPopUp(this,
+									  FlexGlobals.topLevelApplication as DisplayObject,
+									  true);
+				PopUpManager.centerPopUp(this);
+			}
+
+			private function addedToStageHandler(event:Event):void {
+				removeEventListener(FlexEvent.CREATION_COMPLETE,
+									addedToStageHandler);
+				created = true;
+				setting();
+			}
+
+			private function setting():void {
+				if (model.update) {
+					update = true;
+
+					scxml = new File;
+					src = new File;
+					scxml.nativePath = model.cache.scxml.nativePath;
+					src.nativePath = model.cache.src.nativePath;
+
+					scxmlPath.text = scxml.nativePath;
+					srcPath.text = src.nativePath;
+					ns.text = model.cache.ns;
+					context.text = model.cache.context;
+					if (model.cache.overwriting) {
+						overwritingYes.selected = true;
+						overwritingNo.selected = false;
+					} else {
+						overwritingYes.selected = false;
+						overwritingNo.selected = true;
+					}
+				} else {
+					update = false;
+
+					scxml = File.documentsDirectory;
+					src = File.documentsDirectory;
+
+					scxmlPath.text = "";
+					srcPath.text = "";
+					ns.text = "";
+					context.text = "";
+					overwritingYes.selected = false;
+					overwritingNo.selected = true;
+				}
+			}
+
+			private function wire_closeEditorHandler(event:Event):void {
+				PopUpManager.removePopUp(this);
+			}
+
+			/* *********************************************************************
+			* insert information
+			********************************************************************* */
+			private function selectSCXML_clickHandler(event:MouseEvent):void {
+				scxml.browse([ new FileFilter("scxml 파일을 선택해주세요.", "*.scxml")]);
+				scxml.addEventListener(Event.SELECT, scxmlSelect);
+			}
+
+			private function selectSRC_clickHandler(event:MouseEvent):void {
+				src.browseForDirectory("src 폴더를 선택해주세요.");
+				src.addEventListener(Event.SELECT, srcSelect);
+			}
+
+			private function scxmlSelect(event:Event):void {
+				scxml.removeEventListener(Event.SELECT, scxmlSelect);
+				scxmlPath.text = scxml.nativePath;
+				check();
+			}
+
+			private function srcSelect(event:Event):void {
+				src.removeEventListener(Event.SELECT, srcSelect);
+				srcPath.text = src.nativePath;
+				check();
+			}
+
+			private function check():void {
+				ok.enabled = scxmlPath.text != "" && srcPath.text != "" &&
+					ns.text != "";
+			}
+
+			/* *********************************************************************
+			* resulting
+			********************************************************************* */
+			private function cancel_clickHandler(event:MouseEvent):void {
+				scxml = null;
+				src = null;
+				wire.fire(Cancel);
+			}
+
+			private function ok_clickHandler(event:MouseEvent):void {
+				var source:Source;
+				if (update) {
+					source = model.cache;
+				} else {
+					source = new Source;
+					model.cache = source;
+				}
+
+				source.scxml = scxml;
+				source.src = src;
+				source.ns = ns.text;
+				source.context = context.text;
+				source.overwriting = overwrite;
+
+				scxml = null;
+				src = null;
+
+				wire.fire(Complete);
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<scxml2Logic:SCXML2LogicContextLoader/>
+	</fx:Declarations>
+	<s:Button id="selectSCXML"
+		x="318" y="32"
+		label="scxml"
+		click="selectSCXML_clickHandler(event)"/>
+	<s:TextInput id="scxmlPath"
+		x="10" y="32" width="300" editable="false"/>
+	<s:Label 
+		x="10" y="10"
+		text="scxml 파일과 src 폴더 경로를 지정해 주세요."/>
+	<s:Button id="selectSRC"
+		x="318" y="66"
+		label="src"
+		click="selectSRC_clickHandler(event)"/>
+	<s:TextInput id="srcPath"
+		x="10" y="66" width="300" editable="false"/>
+	<s:Label 
+		x="12" y="105"
+		text="package 경로를 지정해주세요."/>
+	<s:TextInput id="ns"
+		x="10" y="125" width="378"
+		change="check()"/>
+	<s:Label 
+		x="12" y="162"
+		text="context 이름을 지정해주세요."/>
+	<s:TextInput id="context"
+		x="10" y="182" width="378"
+		change="check()"/>
+	<s:Label 
+		x="12" y="219"
+		text="같은 소스가 있을때 덮어쓰겠습니까?"/>
+	<s:Button id="ok"
+		x="125" y="271"
+		label="OK"
+		click="ok_clickHandler(event)"/>
+	<s:Button id="cancel"
+		x="203" y="271"
+		label="Cancel"
+		click="cancel_clickHandler(event)"/>
+	<s:RadioButton id="overwritingYes"
+		x="15" y="239"
+		label="예"
+		click="overwrite=true;" groupName="overwriting"/>
+	<s:RadioButton id="overwritingNo"
+		x="72" y="239"
+		label="아니오"
+		click="overwrite=false;" groupName="overwriting"/>
+</s:Panel>
